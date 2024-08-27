@@ -1,0 +1,229 @@
+<style>
+  .sc-front {
+    display: flex;
+    justify-content: center;
+    color: var(--bs-dark);
+    border-radius: 3px;
+    line-height: 30px;
+    text-align: center;
+    background-color: var(--bs-warning-bg-subtle);
+    width: 100%;
+    margin-bottom: 10px;
+    min-height: 100px;
+    border-radius: 5px 5px 100% 100%;
+    font-size: 50px;
+    min-width: 1980px;
+    align-items: center;
+  }
+
+  .sc-seat-row {
+    display: flex;
+  }
+
+  .sc-seats-container {
+    display: flex;
+    flex-direction: column;
+    overflow: auto auto !important;
+    padding: 5px;
+    overflow: hidden;
+  }
+
+  .sc-seat.sc-seat-disabled {
+    color: transparent;
+    background-color: transparent;
+  }
+
+  .sc-seat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+    box-sizing: border-box;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    user-select: none;
+    transition: opacity 0.1s ease-in-out;
+    max-height: 35px;
+    min-height: 35px;
+    max-width: 30px;
+    min-width: 30px;
+    font-size: 12px;
+  }
+
+  .sc-seat:hover {
+    opacity: 0.75;
+  }
+
+  .first-class {
+    color: white;
+    background-color: #277da1;
+  }
+
+  .sc-seat.sc-seat-selected {
+    cursor: pointer;
+    opacity: 0.9;
+    background-color: #43aa8b;
+  }
+
+  .sc-seat.sc-seat-available {
+    cursor: pointer;
+  }
+
+  .sc-seat.sc-seat-reserved,
+  .sc-seat-reserved {
+    color: white;
+    background-color: #d2d2d2;
+    cursor: not-allowed;
+  }
+
+  .sc-spacer {
+    min-height: 43px;
+    max-height: 43px;
+    min-width: 43px;
+    max-width: 43px;
+    text-align: center;
+  }
+
+  .pt-16-custom {
+    padding-top: 4rem;
+  }
+
+  @media (max-width: 891px) {
+    .pt-16-custom {
+      padding-top: 8rem;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    height: 20px;
+    border: 1px solid #000000;
+  }
+
+  ::-webkit-scrollbar-track {
+    border-radius: 0;
+    background: #eeeeee;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    background: #b0b0b0;
+  }
+
+  .sc-selected-div {
+    position: fixed;
+    display: flex;
+    top: 95%;
+    /* Posiciona a parte superior da div no meio vertical */
+    left: 50%;
+    /* Posiciona a parte esquerda da div no meio horizontal */
+    transform: translate(-50%, -50%);
+    /* Move a div de volta metade de sua própria largura e metade de sua própria altura */
+    width: 100%;
+    /* Largura da div (ajuste conforme necessário) */
+    height: 50px;
+    /* Altura da div (ajuste conforme necessário) */
+    justify-content: center;
+  }
+
+  .div-accessibility {
+    background-image: url('assets/img/accessibility.png');
+    background-repeat: no-repeat;
+    background-size: 15px 15px;
+    background-position: left bottom;
+  }
+</style>
+
+<section>
+
+  <div id="seatModalShow" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-body">
+
+          <p>{{seatModal?.identifier + "-" + seatModal?.number}}</p>
+          {{seatModal?.userName}}
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveSuccessModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-body">
+          <p>Escolha de assentos realizada com sucesso</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorMessageModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-body">
+          <p>{{errorMessage}}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-image"></div>
+
+  <div class="content container">
+    <app-navbar></app-navbar>
+    
+    <div *ngIf="loading" class="text-center" id="loading">
+      <div class="spinner-border text-warning" role="status">
+      </div>
+    </div>
+
+    <div class="sc-seats-container" #scrollContainer>
+
+      <div class="sc-selected-div">
+        <button class="btn btn-light" type="button">
+          <i class="fas fa-paper"></i> Disponível: {{availableUserSeats - seatsSelectedList.length}} de
+          {{availableUserSeats}}
+        </button>
+        <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" (click)="salvar()" class="btn btn-warning "
+          type="button">
+          <i class="fas fa-save"></i> Salvar
+        </button>
+      </div>
+
+      <div class="sc-front" style="margin-bottom: 50px;">
+        <img src="assets/img/logo.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top" >
+        <div>&nbsp;Palco&nbsp;</div>
+        <img src="assets/img/logo.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top" >
+      </div>
+      <div class="sc-seat-row" *ngFor="let seatsRow of seatsConfig">
+        <div class="sc-spacer d-flex justify-content-center align-items-center">{{seatsRow.label}}</div>
+        <div style="display: flex;justify-content: flex-end;min-width: 600px">
+          <div class="sc-seat first-class" [ngClass]="validSeat(seatsRow.label, seat)"
+            (click)="selectSeat(seatsRow.label, seat)" *ngFor="let seat of seatsRowCountInit(seatsRow)">{{seat}}</div>
+        </div>
+        <div class="sc-spacer d-flex justify-content-center align-items-center">{{seatsRow.label}}</div>
+        <div style="display: flex;justify-content: center;min-width: 600px">
+          <div class="sc-seat first-class div-accessibility" [ngClass]="validSeat(seatsRow.label, seat)"
+            (click)="selectSeat(seatsRow.label, seat)" *ngFor="let seat of seatsRowCountMiddle(seatsRow)">{{seat}}</div>
+        </div>
+        <div class="sc-spacer d-flex justify-content-center align-items-center">{{seatsRow.label}}</div>
+        <div style="display: flex;justify-content: flex-start;min-width: 600px">
+          <div class="sc-seat first-class" [ngClass]="validSeat(seatsRow.label, seat)"
+            (click)="selectSeat(seatsRow.label, seat)" *ngFor="let seat of seatsRowCountEnd(seatsRow)">{{seat}}</div>
+        </div>
+        <div class="sc-spacer">{{seatsRow.label}}</div>
+      </div>
+    </div>
+  </div>
+
+</section>

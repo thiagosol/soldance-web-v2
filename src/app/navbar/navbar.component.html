@@ -1,0 +1,23 @@
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg mb-3">
+  <div class="container-fluid">
+    <a class="navbar-brand text-warning" href="/">
+      Soldance - Realeza
+    </a>
+    <button *ngIf="canRegister" class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div *ngIf="canRegister" class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" role="button" (click)="seats()"><i class="fa fa-chair"></i> Assentos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" role="button" (click)="users()"><i class="fa fa-list"></i> Cadastros</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" role="button" (click)="register()"><i class="fa fa-plus"></i> Novo Cadastro</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

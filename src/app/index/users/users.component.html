@@ -1,0 +1,49 @@
+<style>
+  .table-dark-custom thead th {
+    color: var(--bs-warning);
+  }
+</style>
+
+<section>
+  <div class="bg-image"></div>
+  <div class="content container">
+    <app-navbar></app-navbar>
+    <div *ngIf="loading" class="text-center" id="loading">
+      <div class="spinner-border text-warning" role="status">
+      </div>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Cadastros</h3>
+      <button class="btn btn-warning" (click)="register()">Novo cadastro</button>
+    </div>
+    <div class="table-responsive mt-3">
+      <table *ngIf="!loading" class="table table-dark table-dark-custom table-hover text-light">
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Ingressos</th>
+            <th scope="col">Assentos</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>
+              {{user.name}}
+            </td>
+            <td>
+              {{user.tickets}}
+            </td>
+            <td>
+              {{user.seats}}
+            </td>
+            <td>
+              <button type="button" class="btn btn-warning" (click)="edit(user.id)">Alterar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

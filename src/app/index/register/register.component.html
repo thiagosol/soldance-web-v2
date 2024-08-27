@@ -1,0 +1,111 @@
+<section>
+  <div id="amountModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-body">
+
+          <form>
+            <div class="mb-3">
+              <label for="amountTickets" class="form-label text-light">Quantidade de Ingressos</label>
+              <input [(ngModel)]="newTicketAmount" name="amountTickets" type="number" class="form-control"
+                placeholder="Digite a nova quantidade de ingressos" required>
+            </div>
+          </form>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()"
+            [disabled]="loading">Fechar</button>
+          <button type="button" class="btn btn-warning" (click)="updateAmount()" [disabled]="loading">Atualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveSuccessModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-body">
+          <p>Salvo com sucesso!</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-bs-dismiss="modal" (click)="closeModal()"
+            [disabled]="loading">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-image"></div>
+  
+  <div class="content container">
+    <app-navbar></app-navbar>
+  </div>
+
+  <div class="content d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-10 col-md-6 col-lg-4">
+      <div class="card" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="card-body">
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+            <span>{{errorMessage}}</span>
+          </div>
+          <div *ngIf="link" class="alert alert-success" role="alert">
+            <span>Link gerado com sucesso</span>
+          </div>
+          <form>
+            <div class="mb-3">
+              <label for="name" class="form-label text-light">Nome</label>
+              <input [(ngModel)]="userRegister.name" name="name" type="text" class="form-control"
+                placeholder="Digite o nome" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="amountTickets" class="form-label text-light">Quantidade de Ingressos</label>
+              <div class="row" *ngIf="id">
+                <div class="col-auto">
+                  <input [(ngModel)]="userRegister.amountTickets" [disabled]="id" name="amountTickets" type="number"
+                    class="form-control" placeholder="Digite a quantidade de ingressos" required>
+                </div>
+                <div class="col-auto">
+                  <button [disabled]="loading" (click)="newAmount()" type="submit"
+                    class="btn btn-warning mb-3">Alterar</button>
+                </div>
+              </div>
+              <input *ngIf="!id" [(ngModel)]="userRegister.amountTickets" [disabled]="id" name="amountTickets"
+                type="number" class="form-control" placeholder="Digite a quantidade de ingressos" required>
+            </div>
+
+            <div class="mb-3" *ngIf="link">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label for="link" class="form-label text-light mb-0">Link</label>
+                <div class="d-flex mb-1">
+                  <button class="btn btn-secondary btn-sm me-2" (click)="copyToClipboard()"><i
+                      class="fa fa-copy"></i></button>
+                  <button class="btn btn-secondary btn-sm" (click)="shareLink()"><i class="fa fa-share"></i></button>
+                </div>
+              </div>
+              <textarea [(ngModel)]="link" rows="4" type="text" name="link" class="form-control" placeholder="Link"
+                disabled>
+                      </textarea>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button *ngIf="!id" (click)="register()" [disabled]="loading" type="button" class="btn btn-warning">Criar
+                e gerar link</button>
+              <button *ngIf="id" (click)="update()" [disabled]="loading" type="button"
+                class="btn btn-warning">Atualizar</button>
+              <button *ngIf="id" (click)="generateLink()" [disabled]="loading" type="button"
+                class="btn btn-secondary">Gerar novo link</button>
+            </div>
+
+            <!-- Loading -->
+            <div *ngIf="loading" class="text-center mt-3" id="loading">
+              <div class="spinner-border text-warning" role="status">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

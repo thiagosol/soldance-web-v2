@@ -1,0 +1,19 @@
+<div class="bg-image"></div>
+<div class="content d-flex justify-content-center align-items-center min-vh-100">
+  <div>
+    <img src="assets/img/logo-letras-brancas.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top" >
+    <h5>Apresenta...</h5>
+    <h1>Realeza</h1>
+    <div class="d-flex flex-column flex-md-row justify-content-center mt-3">
+      <button (click)="seats()" class="btn btn-outline-warning mb-2 mb-md-0 me-md-2" type="button">
+        <i class="fa fa-chair text-light"></i> Assentos
+      </button>
+      <button *ngIf="canRegister" (click)="users()" class="btn btn-outline-warning mb-2 mb-md-0 me-md-2" type="button">
+        <i class="fa fa-list text-light"></i> Cadastros
+      </button>
+      <button *ngIf="canRegister" (click)="register()" class="btn btn-outline-warning mb-2 mb-md-0 me-md-2" type="button">
+        <i class="fa fa-plus text-light"></i> Cadastro
+      </button>
+    </div>
+  </div>
+</div>
