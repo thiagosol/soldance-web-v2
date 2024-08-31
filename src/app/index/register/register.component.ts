@@ -187,9 +187,10 @@ export class RegisterComponent implements OnInit {
     if (navigator.share) {
       navigator.share({
         title: 'Compartilhar link',
-        text: `Espetáculo Realeza \n\nEscolha o(s) seu(s) assento(s) \n\nÉ super simples, 
-        basta realizar a seleção do(s) assento(s) desejados e clicar em salvar, mas não se esqueça, 
-        se não "salvar" a sua escolha não será registrada.`,
+        text: 'Espetáculo Realeza\n\nEscolha o(s) seu(s) assento(s)' +
+        '\n\nÉ super simples, basta realizar a seleção do(s) assento(s) desejados e clicar em salvar, ' +
+        'mas não se esqueça, se não "salvar" a sua escolha não será registrada. ' +
+        'Após salvar você pode imprimir ou compartilhar a imagem com os detalhes dos assentos escolhidos.\n\n',
         url: this.link
       }).then(() => {
         console.log('Texto compartilhado com sucesso!');

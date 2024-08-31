@@ -1,10 +1,14 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { Router } from "@angular/router";
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+
 import { AuthService } from "../../../services/auth.service";
-import { WEB_URL, SOL_DANCE_TOKEN_LOCAL_STORAGE} from '../../../constants';
+import { SOL_DANCE_TOKEN_LOCAL_STORAGE} from '../../../constants';
 import { ActivatedRoute } from '@angular/router';
 import { LocalStorageService } from "../../../services/localStorage.service";
 import { SeatService } from "../../../services/seat.service";
+
+
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 declare var bootstrap: any;
 
@@ -16,6 +20,14 @@ declare var bootstrap: any;
 export class SeatsComponent implements OnInit {
 
   @ViewChild('scrollContainer') scrollContainer: ElementRef | undefined;
+
+  receiptStrLoading = "Carregando...";
+  receipt = {
+    name: this.receiptStrLoading,
+    ticketsAmount: 0,
+    ticketsLeft: 0,
+    tickets: this.receiptStrLoading
+  }
 
   seatsConfig = [
     {label: "X", count: 32, middle: "11-24"},
@@ -57,8 +69,12 @@ export class SeatsComponent implements OnInit {
   private seatModalShow: any;
   private saveSuccessModal: any;
   private errorMessageModal: any;
+  private loadingModal: any;
 
-  constructor(private authService: AuthService, private route: ActivatedRoute, private localStorageService :LocalStorageService, private seatService :SeatService){}
+  constructor(private authService: AuthService, 
+    private route: ActivatedRoute, 
+    private localStorageService :LocalStorageService, 
+    private seatService :SeatService){}
   
   ngOnInit(): void {
     const token = this.route.snapshot?.queryParamMap?.get('t');
@@ -89,6 +105,11 @@ export class SeatsComponent implements OnInit {
     const errorMessageModalElement = document.getElementById('errorMessageModal');
     if (errorMessageModalElement) {
       this.errorMessageModal = new bootstrap.Modal(errorMessageModalElement);
+    }
+
+    const loadingModalElement = document.getElementById('loadingModal');
+    if (loadingModalElement) {
+      this.loadingModal = new bootstrap.Modal(loadingModalElement);
     }
   }
 
@@ -214,11 +235,102 @@ export class SeatsComponent implements OnInit {
     const content: HTMLElement | null = container.querySelector('.sc-front');
     
     if (container && content) {
-      // Calcule a diferença entre a largura do contêiner e do conteúdo
       const scrollOffset = (content.offsetWidth - container.offsetWidth) / 2;
-      
-      // Defina a posição inicial do scroll para que o conteúdo seja centralizado
       container.scrollLeft = scrollOffset;
     }
   }
+
+  async generatePDFShare(type:any = "Share") {
+    this.loadingModal.show()
+    try{
+      const resultSeatsUser = await this.seatService.seatsUser().toPromise();
+      const resultUserLogged = await this.authService.logged().toPromise();
+
+      const ticketsAmount = resultSeatsUser.available;
+      const ticketsLeft = ticketsAmount - resultSeatsUser.seats.length;
+      const tickets = resultSeatsUser.seats.length > 0 ? resultSeatsUser.seats.map((s:any) => s.identifier + "-" + s.number) .join(", ") : "Não escolhido(s)"
+
+      this.receipt = {
+        name: resultUserLogged.name,
+        ticketsAmount: ticketsAmount,
+        ticketsLeft: ticketsLeft,
+        tickets: tickets
+      }
+
+      let conditionMet = false;
+      let startTime = Date.now();
+      const maxDuration = 5000;
+
+      const intervalId = setInterval(() => {
+        if (conditionMet || Date.now() - startTime > maxDuration) {
+          this.loadingModal.hide()
+          if(!conditionMet){
+            this.addErrorMessage("Ocorreu um erro, tente novamente.")
+          }
+          clearInterval(intervalId);
+        } else {
+          try {
+            const section = document.getElementById('receipt-section');
+            if (!section) throw new Error("Receipt-section not found");;
+            section.style.display = 'block';
+            const canvasOptions = {
+              scale: 2,
+              width: section.offsetWidth,
+              height: section.offsetHeight,
+              useCORS: true,
+            };
+
+            conditionMet = !section.innerText.includes(this.receiptStrLoading)
+
+            if(conditionMet){
+              html2canvas(section, canvasOptions).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg')
+  
+                if(type == 'PDF') {
+                  const imgWidth = section.offsetWidth;
+                  const imgHeight = section.offsetHeight;
+                  const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [imgWidth, imgHeight],
+                  });
+  
+                  pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                  pdf.save('assentos-espetaculo-realeza-soldance.pdf');
+  
+                } else {
+                  fetch(imgData)
+                  .then(res => res.blob())
+                  .then(blob => {
+                    const file = new File([blob], 'assentos-espetaculo-realeza-soldance.jpg', { type: 'image/jpeg' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                      navigator.share({
+                        title: 'Soldance - Realeza - Assentos escolhidos',
+                        files: [file],
+                      })
+                      .then(() => console.log('Imagem compartilhada com sucesso!'))
+                      .catch(error => console.error('Erro ao compartilhar a imagem:', error));
+                    } else {
+                      console.log('API Web Share não é suportada ou o compartilhamento de arquivos não é suportado.');
+                    }
+                  });
+                }
+                section.style.display = 'none';
+              });
+            }
+          } catch (error) {
+            this.loadingModal.hide()
+            console.log(error)
+            this.addErrorMessage("Ocorreu um erro, tente novamente.")
+            clearInterval(intervalId);
+          }
+        }
+      }, 200);
+    }catch(error){
+      console.log(error)
+      this.loadingModal.hide()
+      this.addErrorMessage("Ocorreu um erro, tente novamente.")
+    } 
+  }
+  
 }

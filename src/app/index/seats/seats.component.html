@@ -158,6 +158,12 @@
           <p>Escolha de assentos realizada com sucesso</p>
         </div>
         <div class="modal-footer">
+          <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" class="btn btn-success me-1" type="button" (click)="generatePDFShare()">
+            <i class="fa fa-share-alt"></i> Compartilhar
+          </button>
+          <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" class="btn btn-warning me-1" type="button" (click)="generatePDFShare('PDF')">
+            <i class="fa fa-print"></i> Imprimir
+          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Fechar</button>
         </div>
       </div>
@@ -177,11 +183,21 @@
     </div>
   </div>
 
+  <div id="loadingModal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-transparent border-0 text-light">
+        <div class="modal-body text-center">
+          <div class="spinner-border text-warning" role="status">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="bg-image"></div>
 
   <div class="content container">
     <app-navbar></app-navbar>
-    
     <div *ngIf="loading" class="text-center" id="loading">
       <div class="spinner-border text-warning" role="status">
       </div>
@@ -190,20 +206,26 @@
     <div class="sc-seats-container" #scrollContainer>
 
       <div class="sc-selected-div">
-        <button class="btn btn-light" type="button">
-          <i class="fas fa-paper"></i> Disponível: {{availableUserSeats - seatsSelectedList.length}} de
+        <button class="btn btn-light me-1" type="button" (click)="generatePDFShare()">
+          <i class="fa fa-paper"></i> Disponível: {{availableUserSeats - seatsSelectedList.length}} de
           {{availableUserSeats}}
         </button>
-        <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" (click)="salvar()" class="btn btn-warning "
+        <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" (click)="salvar()" class="btn btn-warning  me-1"
           type="button">
-          <i class="fas fa-save"></i> Salvar
+          <i class="fa fa-save"></i> Salvar
+        </button>
+        <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" class="btn btn-success me-1" type="button" (click)="generatePDFShare()">
+          <i class="fa fa-share-alt"></i>
+        </button>
+        <button *ngIf="seatsSelectedList && seatsSelectedList.length > 0" class="btn btn-secondary me-1" type="button" (click)="generatePDFShare('PDF')">
+          <i class="fa fa-print"></i>
         </button>
       </div>
 
       <div class="sc-front" style="margin-bottom: 50px;">
-        <img src="assets/img/logo.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top" >
+        <img src="assets/img/logo.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top">
         <div>&nbsp;Palco&nbsp;</div>
-        <img src="assets/img/logo.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top" >
+        <img src="assets/img/logo.png" alt="Logo" width="150" height="150" class="d-inline-block align-text-top">
       </div>
       <div class="sc-seat-row" *ngFor="let seatsRow of seatsConfig">
         <div class="sc-spacer d-flex justify-content-center align-items-center">{{seatsRow.label}}</div>
@@ -227,3 +249,40 @@
   </div>
 
 </section>
+<div id="receipt-section" style="display: none; color: var(--bs-dark); position: absolute; top: -750px; z-index: -100; min-width: 400px; max-width: 400px;
+    min-height: 750px; max-height: 750px; padding: 20px; background-color: var(--bs-light); ">
+  <div class="container">
+    <div class="d-flex align-items-center">
+      <img src="assets/img/logo.png" class="img-fluid me-3" style="width: 80px;">
+      <div class="text-center" style="width: 170px;">
+        <h6 class="mb-0">Espetáculo</h6>
+        <h2>Realeza</h2>
+      </div>
+    </div>
+    <hr class="my-4 border-warning">
+    <div class="mb-1">
+      <label for="receiptname" class="form-text">Nome</label>
+      <div class="p-1" style="white-space: normal;word-wrap: break-word;" id="conditionsDetail">{{receipt.name}}</div>
+    </div>
+    <div class="mb-1">
+      <label for="receiptticketsAmount" class="form-text">Quantidade de ingressos adquiridos</label>
+      <div class="p-1" style="white-space: normal;word-wrap: break-word;" id="conditionsDetail">{{receipt.ticketsAmount}}</div>
+    </div>
+    <div *ngIf="receipt.ticketsLeft > 0" class="mb-1">
+      <label for="receiptticketsLeft" class="form-text">Você não selecionou assentos ainda para esses ingressos </label>
+      <div class="p-1" style="white-space: normal;word-wrap: break-word;" id="conditionsDetail">{{receipt.ticketsLeft}}</div>
+    </div>
+    <div class="mb-1">
+      <label for="receipttickets" class="form-text">Assentos selecionados</label>
+      <div class="p-1" style="white-space: normal;word-wrap: break-word;" id="conditionsDetail">{{receipt.tickets}}</div>
+    </div>
+    <hr class="my-4 border-warning">
+    <div class="card">
+      <div class="card-body text-center">
+        <p class="card-text">Dia 09 de outubro de 2024</p>
+        <p class="card-text">Às 19hrs</p>
+        <p class="card-text">No Teatro municipal de Uberlândia</p>
+      </div>
+    </div>
+  </div>
+</div>
